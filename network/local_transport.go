@@ -14,7 +14,7 @@ type LocalTransport struct {
 }
 
 // NewLocalTransport returns new LocalTransport implementing Transport.
-func NewLocalTransport(addr NetAddr) Transport {
+func NewLocalTransport(addr NetAddr) *LocalTransport {
 	return &LocalTransport{
 		addr:      addr,
 		consumeCh: make(chan RPC, 1024),
