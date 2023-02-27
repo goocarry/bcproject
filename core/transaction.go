@@ -1,22 +1,41 @@
 package core
 
 import (
-	"io"
+	"fmt"
 
-	"github.com/goocarry/bcproject/types"
+	"github.com/goocarry/bcproject/crypto"
 )
 
 // Transaction ...
 type Transaction struct {
 	Data []byte
 
-	From types.Address
+	PublicKey crypto.PublicKey
+	Signature *crypto.Signature
 }
 
-func (tx *Transaction) DecodeBinary(r io.Reader) error {
+// Sign ...
+func (tx *Transaction) Sign(privKey crypto.PrivateKey) error {
+	sig, err := privKey.Sign(tx.Data)
+	if err != nil {
+		return err
+	}
+
+	tx.PublicKey = privKey.PublicKey()
+	tx.Signature = sig
+
 	return nil
 }
 
-func (tx *Transaction) EncodeBinary(r io.Writer) error {
+// Verify ...
+func (tx *Transaction) Verify() error {
+	if tx.Signature == nil {
+		return fmt.Errorf("transaction has no signature")
+	}
+
+	if !tx.Signature.Verify(tx.PublicKey, tx.Data) {
+		return fmt.Errorf("invalid transaction signature")
+	}
+
 	return nil
 }
