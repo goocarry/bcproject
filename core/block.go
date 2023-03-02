@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
-	"io"
 
 	"github.com/goocarry/bcproject/crypto"
 	"github.com/goocarry/bcproject/types"
@@ -85,13 +84,13 @@ func (b *Block) Verify() error {
 }
 
 // Decode ...
-func (b *Block) Decode(r io.Reader, dec Decoder[*Block]) error {
-	return dec.Decode(r, b)
+func (b *Block) Decode(dec Decoder[*Block]) error {
+	return dec.Decode(b)
 }
 
 // Encoder ...
-func (b *Block) Encoder(w io.Writer, enc Encoder[*Block]) error {
-	return enc.Encode(w, b)
+func (b *Block) Encoder(enc Encoder[*Block]) error {
+	return enc.Encode(b)
 }
 
 // Hash ...
