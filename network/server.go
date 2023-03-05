@@ -96,7 +96,8 @@ func (s *Server) ProcessTransaction(from NetAddr, tx *core.Transaction) error {
 	tx.SetFirstSeen(time.Now().UnixNano())
 
 	logrus.WithFields(logrus.Fields{
-		"hash": hash,
+		"hash":           hash,
+		"mempool length": s.memPool.Len(),
 	}).Info("adding new tx to the mempool")
 
 	return s.memPool.Add(tx)
