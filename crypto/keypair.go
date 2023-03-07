@@ -5,6 +5,7 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/hex"
 	"math/big"
 
 	"github.com/goocarry/bcproject/types"
@@ -42,34 +43,42 @@ func GeneratePrivateKey() PrivateKey {
 
 // PublicKey ...
 func (k PrivateKey) PublicKey() PublicKey {
-	return PublicKey{
-		Key: &k.key.PublicKey,
-	}
+	return elliptic.MarshalCompressed(k.key.PublicKey, k.key.PublicKey.X, k.key.PublicKey.Y)
 }
 
 // PublicKey ...
-type PublicKey struct {
-	Key *ecdsa.PublicKey
-}
+type PublicKey []byte
 
-// ToSlice ...
-func (k PublicKey) ToSlice() []byte {
-	return elliptic.MarshalCompressed(k.Key, k.Key.X, k.Key.Y)
+func (k PublicKey) String() string {
+	return hex.EncodeToString(k)
 }
 
 // Address ...
 func (k PublicKey) Address() types.Address {
-	h := sha256.Sum256(k.ToSlice())
+	h := sha256.Sum256(k)
 
 	return types.AddressFromBytes(h[len(h)-20:])
 }
 
 // Signature ...
 type Signature struct {
-	S, R *big.Int
+	S *big.Int
+	R *big.Int
+}
+
+func (sig Signature) String() string {
+	b := append(sig.S.Bytes(), sig.R.Bytes()...)
+	return hex.EncodeToString(b)
 }
 
 // Verify ...
 func (sig Signature) Verify(pubKey PublicKey, data []byte) bool {
-	return ecdsa.Verify(pubKey.Key, data, sig.R, sig.S)
+	x, y := elliptic.UnmarshalCompressed(elliptic.P256(), pubKey)
+	key := &ecdsa.PublicKey{
+		Curve: elliptic.P256(),
+		X:     x,
+		Y:     y,
+	}
+
+	return ecdsa.Verify(key, data, sig.R, sig.S)
 }

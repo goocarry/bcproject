@@ -115,8 +115,8 @@ func (b *Block) Decode(dec Decoder[*Block]) error {
 	return dec.Decode(b)
 }
 
-// Encoder ...
-func (b *Block) Encoder(enc Encoder[*Block]) error {
+// Encode ...
+func (b *Block) Encode(enc Encoder[*Block]) error {
 	return enc.Encode(b)
 }
 

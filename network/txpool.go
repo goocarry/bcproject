@@ -42,8 +42,7 @@ func (p *TxPool) Add(tx *core.Transaction) {
 
 // Contains returns a boolean if transaction alreaady exists by hash.
 func (p *TxPool) Contains(hash types.Hash) bool {
-	// _, ok := p.all[hash]
-	return false
+	return p.all.Contains(hash)
 }
 
 // Pending returns a slice of transactions that are in the pending pool
