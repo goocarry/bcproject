@@ -3,7 +3,6 @@ package types
 import (
 	"encoding/hex"
 	"fmt"
-	"math/rand"
 )
 
 // Hash ...
@@ -47,16 +46,4 @@ func HashFromBytes(b []byte) Hash {
 	}
 
 	return Hash(value)
-}
-
-// RandomBytes generates slice of random bytes.
-func RandomBytes(size int) []byte {
-	token := make([]byte, size)
-	rand.Read(token)
-	return token
-}
-
-// RandomHash generates random Hash.
-func RandomHash() Hash {
-	return HashFromBytes(RandomBytes(32))
 }
