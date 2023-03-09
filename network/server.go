@@ -11,7 +11,7 @@ import (
 	"github.com/goocarry/bcproject/types"
 )
 
-var defaultBlockTime = 5 * time.Second
+var defaultBlockTime = 3 * time.Second
 
 // ServerOpts ...
 type ServerOpts struct {
@@ -118,6 +118,8 @@ func (s *Server) ProcessMessage(msg *DecodedMessage) error {
 	switch t := msg.Data.(type) {
 	case *core.Transaction:
 		return s.processTransaction(t)
+	case *core.Block:
+		return s.processBlock(t)
 	}
 
 	return nil
@@ -131,6 +133,10 @@ func (s *Server) broadcast(payload []byte) error {
 	}
 
 	return nil
+}
+
+func (s *Server) processBlock(b *core.Block) error {
+	return s.chain.AddBlock(b)
 }
 
 // processTransaction ...
@@ -147,6 +153,12 @@ func (s *Server) processTransaction(tx *core.Transaction) error {
 
 	tx.SetFirstSeen(time.Now().UnixNano())
 
+	// s.Logger.Log(
+	// 	"msg", "adding new tx to mempool",
+	// 	"hash", hash,
+	// 	"mempoolPending", s.memPool.PendingCount(),
+	// )
+
 	go s.broadcastTx(tx)
 
 	s.memPool.Add(tx)
@@ -155,7 +167,14 @@ func (s *Server) processTransaction(tx *core.Transaction) error {
 }
 
 func (s *Server) broadcastBlock(b *core.Block) error {
-	return nil
+	buf := &bytes.Buffer{}
+	if err := b.Encode(core.NewGobBlockEncoder(buf)); err != nil {
+		return err
+	}
+
+	msg := NewMessage(MessageTypeBlock, buf.Bytes())
+
+	return s.broadcast(msg.Bytes())
 }
 
 func (s *Server) broadcastTx(tx *core.Transaction) error {
@@ -205,6 +224,8 @@ func (s *Server) createNewBlock() error {
 	}
 
 	s.memPool.ClearPending()
+
+	s.broadcastBlock(block)
 
 	return nil
 }

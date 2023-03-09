@@ -16,8 +16,8 @@ type MessageType byte
 const (
 	// MessageTypeTx ...
 	MessageTypeTx MessageType = 0x1
-	// MessageTypeBock ...
-	MessageTypeBock
+	// MessageTypeBlock ...
+	MessageTypeBlock MessageType = 0x2
 )
 
 // RPC is a message sent over the transport layer.
@@ -78,6 +78,16 @@ func DefaRPCDecodeFunc(rpc RPC) (*DecodedMessage, error) {
 		return &DecodedMessage{
 			From: rpc.From,
 			Data: tx,
+		}, nil
+
+	case MessageTypeBlock:
+		block := new(core.Block)
+		if err := block.Decode(core.NewGobBlockDecoder(bytes.NewReader(msg.Data))); err != nil {
+			return nil, err
+		}
+		return &DecodedMessage{
+			From: rpc.From,
+			Data: block,
 		}, nil
 
 	default:
