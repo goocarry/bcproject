@@ -136,6 +136,12 @@ func (s *Server) broadcast(payload []byte) error {
 }
 
 func (s *Server) processBlock(b *core.Block) error {
+	if err := s.chain.AddBlock(b); err != nil {
+		return err
+	}
+
+	go s.broadcastBlock(b)
+
 	return s.chain.AddBlock(b)
 }
 

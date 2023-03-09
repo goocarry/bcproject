@@ -36,6 +36,16 @@ func main() {
 		}
 	}()
 
+	go func() {
+		time.Sleep(7 * time.Second)
+
+		trLateRemote := network.NewLocalTransport("REMOTE_LATE")
+		trRemoteC.Connect(trLateRemote)
+
+		trLateRemoteServer := makeServer(string(trLateRemote.Addr()), trLateRemote, nil)
+		go trLateRemoteServer.Start()
+	}()
+
 	privKey := crypto.GeneratePrivateKey()
 	// opts := network.ServerOpts{
 	// 	PrivateKey: &privKey,
